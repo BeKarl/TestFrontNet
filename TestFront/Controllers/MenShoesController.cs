@@ -133,25 +133,20 @@ namespace TestFront.Controllers
         }
         [Route("SaveFile")]
         [HttpPost]
-        public JsonResult SaveFile()
+        public async Task<IActionResult> SaveFile(IFormFile uploadedFile)
         {
-            try
+            if (uploadedFile != null)
             {
-                var httpRequest = Request.Form;
-                var postedFile = httpRequest.Files[0];
-                string filename = postedFile.FileName;
-                var physicalPath = _env.ContentRootPath + "/Photos/" + filename;
-
-                using (var stream = new FileStream(physicalPath, FileMode.Create))
+                string path = "/Photos/" + uploadedFile.FileName;
+                using (var fileStream = new FileStream(_env.ContentRootPath + path, FileMode.Create))
                 {
-                    postedFile.CopyTo(stream);
+                    await uploadedFile.CopyToAsync(fileStream);
                 }
-                return new JsonResult(filename);
+                return Ok();
             }
-            catch (Exception)
+            else
             {
-
-                return new JsonResult("anonymous.png");
+                return BadRequest();
             }
         }
 
